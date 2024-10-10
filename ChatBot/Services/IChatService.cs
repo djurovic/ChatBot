@@ -2,6 +2,6 @@
 {
     public interface IChatService
     {
-        Task<string> GetChatResponse(string question);
+        Task<string> GetChatResponse(string userId, string question);
     }
 }

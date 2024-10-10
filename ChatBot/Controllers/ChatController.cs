@@ -21,72 +21,21 @@ namespace ChatBot.Controllers
         }
 
 
-        [HttpGet("call-external-api")]
-        public async Task<IActionResult> CallExternalApi()
+        [HttpGet("secretTest")]
+        public IActionResult Get()
         {
-            string url = "http://localhost:6000/api/Vacation/by-date-interval?startDate=2024-01-01&endDate=2025-01-15";
-
-            try
-            {
-                HttpResponseMessage response = await _httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-
-                string responseBody = await response.Content.ReadAsStringAsync();
-
-                // Optionally, you can deserialize the response here
-                // var orders = JsonSerializer.Deserialize<Order[]>(responseBody);
-
-                return Ok(responseBody);
-            }
-            catch (HttpRequestException e)
-            {
-                return StatusCode(500, $"Request error: {e.Message}");
-            }
+            return Ok("This is a secret message for authenticated users only");
         }
 
-        /*[HttpPost]
-        public async Task<IActionResult> Chat()
-        {
-            string context = GetSentence();
-            var request = new ChatRequest
-            {
-                model = "llama3",
-                messages = new[]
-                {
-                new Message { role = "user", content = $"{context} Who is on vacation in May?" }
-            },
-                stream = false
-            };
-
-            var json = JsonConvert.SerializeObject(request);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync("http://localhost:11434/api/chat", content);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var chatResponse = JsonConvert.DeserializeObject<ChatResponse>(responseContent);
-
-                // Extract the content
-                string extractedContent = chatResponse.message.content;
-
-                return Ok(extractedContent);
-            }
-            else
-            {
-                return BadRequest("Failed to get response from the chat API");
-            }
-        }*/
+        
 
 
         [HttpPost]
-        public async Task<IActionResult> Chat(string question)
+        public async Task<IActionResult> Chat([FromBody] ChatRequestModel model)
         {
             try
             {
-                
-                string response = await chatService.GetChatResponse(question);
+                string response = await chatService.GetChatResponse(model.UserId, model.Question);
                 return Ok(response);
             }
             catch (Exception ex)
@@ -96,12 +45,13 @@ namespace ChatBot.Controllers
         }
 
 
-
-
-
-
-
-
     }
+
+    public class ChatRequestModel
+    {
+        public string UserId { get; set; }
+        public string Question { get; set; }
+    }
+
 }
 
